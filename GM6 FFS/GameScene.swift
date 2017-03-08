@@ -19,16 +19,18 @@ enum sizes {
 enum sys {
   
   static var
-  scene: SKScene = SKScene(),
-  igeCounter = 0,
-  currentNode: IGE?,                    // NP
-  frames: [String: CGRect] = [:],
-  collided: IGE?
+  scene:        SKScene = SKScene(),
+  igeCounter    = 0,
+  currentNode:  IGE?,                    // NP
+  frames:       [String: CGRect] = [:],
+  collided:     IGE?,
+  doCollisions: Bool = false
   
   enum touches {
     static var
+    isTouching: Bool = false,
     tb: (IGE, CGPoint)?,
-    tm: (IGE, Any?)?,
+    tm: (IGE, CGPoint)?,
     te: IGE?
     
     static func noTouchErrors() -> Bool { // Can't have two touch commands at update.
@@ -47,9 +49,10 @@ enum sys {
       }
       return true
     }
-    
+      
     static func resetTouches() { tb = nil; tm = nil; te = nil }
   }
+  
   
   /// Use this at various times... when sorting / swapping / deleting / adding iges.
   static func render(from ige: IGE) { // NP
@@ -81,6 +84,8 @@ enum sys {
 class IGE: SKSpriteNode {
   
   override var parent: SKNode? { fatalError(" dont call parent!") }
+  
+  override func addChild(_ node: SKNode) { fatalError("don't call addChild") }
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     sys.touches.tb = (self, touches.first!.location(in: scene!))
@@ -169,8 +174,8 @@ final class Prompt: IGE_CanDraw {
   var mother: Choice
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    position = touches.first!.location(in: scene!)
-    draw()
+    sys.touches.tm = (self, touches.first!.location(in: scene!))
+    
   }
   
   override func addChild(_ node: SKNode) {
@@ -218,8 +223,8 @@ final class Choice: IGE {
   }
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    position = touches.first!.location(in: scene!)
-    align()
+      sys.touches.tm = (self, touches.first!.location(in: scene!))
+    
   }
   
   init(title: String, mother: IGE_CanDraw) {
@@ -332,25 +337,62 @@ class GameScene: SKScene {
     
     
     TOUCHES: do {
-      guard sys.touches.noTouchErrors() else { break TOUCHES }
-      if let ige = sys.touches.tb?.0 {
-        sys.currentNode = ige
-      }
-    }
-    
-    HITDETECT: do {
+      guard sys.touches.noTouchErrors() else { fatalError("too many touches") }
       
-      for child in children {
-        if child.name == "bkg" { continue }
-        if child.name == sys.currentNode!.name { continue }
-        
-        if sys.currentNode!.frame.intersects(child.frame) {
-          print("hit detected")
-          sys.collided = child as! IGE
-          return          // Early exit.
+      // IA copies:
+      let began = sys.touches.tb, moved = sys.touches.tm, ended = sys.touches.te,
+      isTouching = sys.touches.isTouching
+      
+      BEGAN: do {
+        if let ige = began?.0 {
+          sys.currentNode = ige
+          sys.touches.isTouching = true
+          break TOUCHES
         }
       }
-      sys.collided = nil  // FIXME: Make sure this works...
+      
+      MOVED: do {
+        if let ige = moved?.0 as? Prompt {
+          guard isTouching else { fatalError("wasn't touching") }
+          sys.doCollisions = true
+          ige.position = moved!.1
+          ige.draw()
+          break TOUCHES
+        }
+        else if let ige = moved?.0 as? Choice {
+          guard isTouching else { fatalError("wasn't touching") }
+          sys.doCollisions = true
+          ige.position = moved!.1
+          ige.align()
+          break TOUCHES
+        }
+      }
+      
+      ENDED: do {
+        if let ige = ended {
+          guard isTouching else { fatalError("wasn't touching") }
+          sys.touches.isTouching = false
+          sys.doCollisions = true
+        }
+      }
+    }
+    sys.touches.resetTouches()
+    
+    HITDETECT: do {
+      if sys.doCollisions {
+        sys.doCollisions = false
+        for child in children {
+          if child.name == "bkg" { continue }
+          if child.name == sys.currentNode!.name { continue }
+          
+          if sys.currentNode!.frame.intersects(child.frame) {
+            print("hit detected")
+            sys.collided = child as! IGE
+            return          // Early exit.
+          }
+        }
+        sys.collided = nil  // FIXME: Make sure this works...
+      }
     }
   }
 };
