@@ -30,7 +30,9 @@ enum sys {
     isTouching: Bool = false,
     tb: (IGE, CGPoint)?,
     tm: (IGE, CGPoint)?,
-    te: IGE?
+    te: IGE?,
+    addButton: Button?
+    
     
     static func noTouchErrors() -> Bool { // Can't have two touch commands at update.
       // FIXME: Add error messages or change to guard... and check for more than 1.
@@ -81,14 +83,17 @@ enum sys {
 
 class IGE: SKSpriteNode {
   
-  override var parent: SKNode? { fatalError(" dont call parent!") }
+  // Don't use:
+  override var parent: SKNode?           { fatalError("IGE: Don't call .parent!"  ) }
+  override var children: [SKNode]        { fatalError("IGE: Don't call .children!") }
+  override func addChild(_ node: SKNode) { fatalError("IGE: Don't call .addChild!") }
   
-  override func addChild(_ node: SKNode) { fatalError("don't call addChild") }
-  
+  // Touch signaler:
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     sys.touches.tb = (self, touches.first!.location(in: scene!))
   }
   
+  // Init stuff:
   private func findName(title: String) -> String {
     let myType = String(describing: type(of: self))
     return (myType + ": " + title + String(sys.igeCounter))
@@ -247,13 +252,6 @@ class Button: SKSpriteNode {
   
   required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented")  }
   
-  func promptChoiceCode(theNode: SKNode, runIfPrompt: ()->(), runIfChoice: ()->() ) {
-    if theNode is Prompt {
-      runIfPrompt()
-    } else if theNode is Choice {
-      runIfChoice()
-    } else { fatalError("not a correct type") }
-  }
 };
 
 final class AddButton: Button {
@@ -386,24 +384,35 @@ class GameScene: SKScene {
     }
     
     
-    HITDETECT: do {
-      let doCollisions = handleTouchesThenCheckIfNeedCollisionCheck()
-      if doCollisions {
+    func doCollisionsIfNeededThenReturnIfNeedCheckAddButtons() -> Bool {
+      let checkCollisions = handleTouchesThenCheckIfNeedCollisionCheck()
+      
+      if checkCollisions {
         for child in children {
           if child.name == "bkg" { continue }
           if child.name == sys.currentNode!.name { continue }
           
           if sys.currentNode!.frame.intersects(child.frame) {
+            // Do collision:
             print("hit detected")
-            sys.collided = child as! IGE
-            return
-            // Early exit.
+            return false
           }
         }
-        sys.collided = nil  // FIXME: Make sure this works...
+        
+      }
+      // Base case:
+      return true
+    }
+    
+    ADDBUTTON: do {
+      let checkAddButtons = doCollisionsIfNeededThenReturnIfNeedCheckAddButtons()
+      
+      if  checkAddButtons {
+      
       }
     }
   }
+
 };
 
 func stuff() {
