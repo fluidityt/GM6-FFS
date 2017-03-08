@@ -23,8 +23,7 @@ enum sys {
   igeCounter    = 0,
   currentNode:  IGE?,                    // NP
   frames:       [String: CGRect] = [:],
-  collided:     IGE?,
-  doCollisions: Bool = false
+  collided:     IGE?
   
   enum touches {
     static var
@@ -49,10 +48,9 @@ enum sys {
       }
       return true
     }
-      
+    
     static func resetTouches() { tb = nil; tm = nil; te = nil }
-  }
-  
+  };
   
   /// Use this at various times... when sorting / swapping / deleting / adding iges.
   static func render(from ige: IGE) { // NP
@@ -335,36 +333,44 @@ class GameScene: SKScene {
   
   override func update(_ currentTime: TimeInterval) {
     
+    // Check for touches on IGE
+    // Determine if need collision
+    // Handle collision
+    // Check if touch on Button
+    // Add children if need
+    // Draw stuff
     
-    TOUCHES: do {
+    func handleTouchesThenCheckIfNeedCollisionCheck() -> Bool {
+      
+      defer { sys.touches.resetTouches() }
+      
       guard sys.touches.noTouchErrors() else { fatalError("too many touches") }
       
       // IA copies:
       let began = sys.touches.tb, moved = sys.touches.tm, ended = sys.touches.te,
       isTouching = sys.touches.isTouching
       
+      
       BEGAN: do {
         if let ige = began?.0 {
           sys.currentNode = ige
           sys.touches.isTouching = true
-          break TOUCHES
+          return false
         }
       }
       
       MOVED: do {
         if let ige = moved?.0 as? Prompt {
           guard isTouching else { fatalError("wasn't touching") }
-          sys.doCollisions = true
           ige.position = moved!.1
           ige.draw()
-          break TOUCHES
+          return false
         }
         else if let ige = moved?.0 as? Choice {
           guard isTouching else { fatalError("wasn't touching") }
-          sys.doCollisions = true
           ige.position = moved!.1
           ige.align()
-          break TOUCHES
+          return false
         }
       }
       
@@ -372,15 +378,17 @@ class GameScene: SKScene {
         if let ige = ended {
           guard isTouching else { fatalError("wasn't touching") }
           sys.touches.isTouching = false
-          sys.doCollisions = true
+          return true
         }
       }
+      // Base case:
+      return false
     }
-    sys.touches.resetTouches()
+    
     
     HITDETECT: do {
-      if sys.doCollisions {
-        sys.doCollisions = false
+      let doCollisions = handleTouchesThenCheckIfNeedCollisionCheck()
+      if doCollisions {
         for child in children {
           if child.name == "bkg" { continue }
           if child.name == sys.currentNode!.name { continue }
@@ -388,7 +396,8 @@ class GameScene: SKScene {
           if sys.currentNode!.frame.intersects(child.frame) {
             print("hit detected")
             sys.collided = child as! IGE
-            return          // Early exit.
+            return
+            // Early exit.
           }
         }
         sys.collided = nil  // FIXME: Make sure this works...
