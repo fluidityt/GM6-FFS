@@ -1,8 +1,45 @@
 import SpriteKit
 
 //
-//  Enums.swift
+// HandleTouch.swift
 //
+
+enum TouchTypes { case began, moved, ended, added }
+typealias  Touch = (TouchTypes, Any, Any)?
+let void = Void()
+let aTouch: Touch = (TouchTypes.began, IGE.init(title: "hi"), void)
+typealias CheckCollisions = Bool
+
+func handleTouch(riskyTouch: Touch) -> CheckCollisions {
+  guard let theTouch = riskyTouch else { return false }
+  if theTouch.0 == .moved { if !sys.isTouching { fatalError() } }
+  if theTouch.0 == .ended { if !sys.isTouching { fatalError() } }
+  defer { sys.touch = nil }
+  
+  switch theTouch {
+    
+  case (.began, let ige as IGE, _):
+    sys.currentNode = ige
+    sys.touches.isTouching = true
+    return false
+    
+  case (.moved, let prompt as Prompt, let xy as CGPoint):
+    prompt.position = xy
+    prompt.draw()
+    return false
+    
+  case (.moved, let choice as Choice, let xy as CGPoint):
+    choice.position = xy
+    choice.align()
+    return false
+    
+  case (.ended, _, _):
+    sys.touches.isTouching = false
+    return true
+    
+  default: return false
+  }
+}
 
 enum Modes { case swap }
 
@@ -16,6 +53,7 @@ enum sizes {
   }
 }
 
+// Namespace:
 enum sys {
   
   static var
@@ -23,36 +61,10 @@ enum sys {
   igeCounter    = 0,
   currentNode:  IGE?,                    // NP
   frames:       [String: CGRect] = [:],
-  collided:     IGE?
+  collided:     IGE?,
   
-  enum touches {
-    static var
-    isTouching: Bool = false,
-    tb: (IGE, CGPoint)?,
-    tm: (IGE, CGPoint)?,
-    te: IGE?,
-    addButton: Button?
-    
-    
-    static func noTouchErrors() -> Bool { // Can't have two touch commands at update.
-      // FIXME: Add error messages or change to guard... and check for more than 1.
-      if tb != nil {
-        if tm != nil      { return false }
-        else if te != nil { return false }
-      }
-      else if tm != nil {
-        if tb != nil      { return false }
-        else if te != nil { return false }
-      }
-      else if te != nil {
-        if tb != nil      { return false }
-        else if tm != nil { return false }
-      }
-      return true
-    }
-    
-    static func resetTouches() { tb = nil; tm = nil; te = nil }
-  };
+  touch: Touch,
+  isTouching: Bool = false
   
   /// Use this at various times... when sorting / swapping / deleting / adding iges.
   static func render(from ige: IGE) { // NP
@@ -157,13 +169,8 @@ class IGE_CanDraw: IGE {
   
   override func addChild(_ node: SKNode) {
     guard let child = node as? Choice else { print("addChild: not a choice"); return }
+    addKid()
     
-    scene!.addChild(child)
-    childs.append(child)
-    sys.currentNode = child
-    
-    draw()
-    resize()
   }
 }
 
@@ -216,18 +223,11 @@ final class Choice: IGE {
   override func addChild(_ node: SKNode) {
     if child != nil { print("addChild: already has prompt"); return }
     guard let prompt = node as? Prompt else { print("not a prompt"); return }
-    prompt.mother = self
-    
-    scene!.addChild(prompt)
-    child = prompt
-    sys.currentNode = child
-    
-    align()
+    addKid()
   }
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
       sys.touches.tm = (self, touches.first!.location(in: scene!))
-    
   }
   
   init(title: String, mother: IGE_CanDraw) {
@@ -329,93 +329,30 @@ class GameScene: SKScene {
     if let collided = sys.collided { doCollision(for: collided) }
   }
   
+  //
+  // Stuff:
+  //
+  
+  func doCollisionsIfNeededThenReturnIfNeedCheckAddButtons() -> Bool {
+    let checkCollisions = handleTouch(riskyTouch: sys.touch)
+    
+    if checkCollisions {
+      for child in children {
+        if child.name == "bkg" { continue }
+        if child.name == sys.currentNode!.name { continue }
+        
+        if sys.currentNode!.frame.intersects(child.frame) {
+          // Do collision:
+          print("hit detected")
+          return false
+        }
+      }
+    }
+    // Base case:
+    return true
+  }
+  
   override func update(_ currentTime: TimeInterval) {
     
-    // Check for touches on IGE
-    // Determine if need collision
-    // Handle collision
-    // Check if touch on Button
-    // Add children if need
-    // Draw stuff
-    
-    func handleTouchesThenCheckIfNeedCollisionCheck() -> Bool {
-      
-      defer { sys.touches.resetTouches() }
-      
-      guard sys.touches.noTouchErrors() else { fatalError("too many touches") }
-      
-      // IA copies:
-      let began = sys.touches.tb, moved = sys.touches.tm, ended = sys.touches.te,
-      isTouching = sys.touches.isTouching
-      
-      
-      BEGAN: do {
-        if let ige = began?.0 {
-          sys.currentNode = ige
-          sys.touches.isTouching = true
-          return false
-        }
-      }
-      
-      MOVED: do {
-        if let ige = moved?.0 as? Prompt {
-          guard isTouching else { fatalError("wasn't touching") }
-          ige.position = moved!.1
-          ige.draw()
-          return false
-        }
-        else if let ige = moved?.0 as? Choice {
-          guard isTouching else { fatalError("wasn't touching") }
-          ige.position = moved!.1
-          ige.align()
-          return false
-        }
-      }
-      
-      ENDED: do {
-        if let ige = ended {
-          guard isTouching else { fatalError("wasn't touching") }
-          sys.touches.isTouching = false
-          return true
-        }
-      }
-      // Base case:
-      return false
-    }
-    
-    
-    func doCollisionsIfNeededThenReturnIfNeedCheckAddButtons() -> Bool {
-      let checkCollisions = handleTouchesThenCheckIfNeedCollisionCheck()
-      
-      if checkCollisions {
-        for child in children {
-          if child.name == "bkg" { continue }
-          if child.name == sys.currentNode!.name { continue }
-          
-          if sys.currentNode!.frame.intersects(child.frame) {
-            // Do collision:
-            print("hit detected")
-            return false
-          }
-        }
-        
-      }
-      // Base case:
-      return true
-    }
-    
-    ADDBUTTON: do {
-      let checkAddButtons = doCollisionsIfNeededThenReturnIfNeedCheckAddButtons()
-      
-      if  checkAddButtons {
-      
-      }
-    }
   }
-
 };
-
-func stuff() {
-
-
-}
