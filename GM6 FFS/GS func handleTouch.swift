@@ -9,8 +9,9 @@ extension GameScene {
   func handleTouch(riskyTouch: Touch) -> CheckCollisions {
     
     guard let theTouch = riskyTouch else { return false }
-    if theTouch.0 == .moved { if !sys.isTouching { fatalError() } }
-    if theTouch.0 == .ended { if !sys.isTouching { fatalError() } }
+    // FIXME: Apparently this was possible >.>()
+    if theTouch.0 == .moved { if !sys.isTouching { fatalError("how possible??") } }
+    if theTouch.0 == .ended { if !sys.isTouching { fatalError("how possible??") } }
     defer { sys.touch = nil } // VERY IMPORTANT
     
     switch theTouch {
@@ -32,10 +33,11 @@ extension GameScene {
       
     case (.ended, _, _):
       checkCollisions()
-      if var collidedChoice = sys.collided as? Choice {
-        if var currentChoice = sys.currentNode as? Choice {
-          
-          doCollision(with: sys.collided! as! Choice, against: sys.currentNode! as! Choice)
+      if let collidedChoice = sys.collided as? Choice {
+        if let currentChoice = sys.currentNode as? Choice {
+
+          swapChoices(choice1: collidedChoice, choice2: currentChoice)
+          //doCollision(with: sys.collided! as! Choice, against: sys.currentNode! as! Choice)
         }
       }
       

@@ -124,7 +124,19 @@ final class Choice: IGE {
     self.mother = mother
     super.init(title: title)
   }
+  
   required init?(coder aDecoder: NSCoder) { fatalError("") }
+  
+  func transfer(to choice: Choice) {
+    choice.name   = name
+    choice.mother = mother
+    choice.color  = color
+    choice.child  = child
+    choice.size   = size
+    choice.position = position
+    
+    choice.mother.childs
+  }
 };
 
 //

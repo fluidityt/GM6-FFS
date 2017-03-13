@@ -9,14 +9,23 @@ extension GameScene {
   func swapChoices(choice1: Choice, choice2: Choice) {
     print("swapping choices")
    
-    let tempColor = choice1.color
+    let tempChoice = Choice(title: "", mother: choice1.mother)
+    choice1.transfer(to: tempChoice)
+    
+    choice2.transfer(to: choice1)
+    align(choice1)
+    
+    // FIXME: Overflow: need to make removeKid() func :)
+    tempChoice.transfer(to: choice2)
+    align(tempChoice)
+    
+    /*let tempColor = choice1.color
     
     choice1.color = choice2.color
     choice2.color = tempColor
-    
+    */
     // FIXME: determine which one is further left
-    align(choice1)
-    align(choice2)
+    //align(choice2)
     
   }
   
