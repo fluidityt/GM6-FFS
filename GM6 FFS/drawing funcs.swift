@@ -33,20 +33,3 @@ func resize(_ igecd: IGE_CanDraw) {
   }
   sys.frames[igecd.name!] = igecd.frame
 }
-
-func swapChoices(detectedChoice: inout Choice) {
-  guard sys.currentNode is Choice else { fatalError("swapChoice: sys.curnode ! choice") }
-  print("swapping choices")
-  
-  let tempNode    = sys.currentNode!.copy() as! Choice // For use with detectedChoice.
-  sys.currentNode = detectedChoice.copy()   as! Choice
-  detectedChoice  = tempNode.copy()         as! Choice
-  
-  // FIXME: determine which one is further left
-  align(detectedChoice)
-  align(sys.currentNode! as! Choice)
-  
-  // guard var curNode = sys.currentNode as? Choice else { fatalError("swapChoice: not a Choice selected") }
-  // swap(&curNode, &detectedChoice)
-}
-

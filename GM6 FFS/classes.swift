@@ -11,8 +11,8 @@ import SpriteKit
 class IGE: SKSpriteNode {
   
   // Don't use:
-  override var parent: SKNode?           { fatalError("IGE: Don't call .parent!"  ) }
-  override var children: [SKNode]        { fatalError("IGE: Don't call .children!") }
+  override var parent: SKNode?    { fatalError("IGE: Don't call .parent!"  ) }
+  override var children: [SKNode] { fatalError("IGE: Don't call .children!") }
   /*override func addChild(_ node: SKNode) { fatalError("IGE: Don't call .addChild!") }*/
   
   // Touch signaler:
@@ -23,26 +23,26 @@ class IGE: SKSpriteNode {
   }
   
   // Init stuff:
-  private func findName(title: String) -> String {
-    let myType = String(describing: type(of: self))
-    return (myType + ": " + title + String(sys.igeCounter))
-  }
-  
-  private func findColor() -> SKColor {
-    let myType = String(describing: type(of: self))
-    if myType == "Prompt" || myType == "Super" {
-      return .blue
-    } else { return .red }
-  }
-  
-  private func findSize() -> CGSize {
-    let myType = String(describing: type(of: self))
-    if myType == "Prompt" || myType == "Super" {
-      return sizes.prompt
-    } else { return sizes.choice }
-  }
-  
   init(title: String) {
+    
+    let myType = String(describing: type(of: self))
+    
+    func findName(title: String) -> String {
+      return (myType + ": " + title + String(sys.igeCounter))
+    }
+    
+    func findColor() -> SKColor {
+      if myType == "Prompt" || myType == "Super" {
+        return .blue
+      } else { return .red }
+    }
+    
+    func findSize() -> CGSize {
+      if myType == "Prompt" || myType == "Super" {
+        return sizes.prompt
+      } else { return sizes.choice }
+    }
+    
     super.init(texture: nil, color: .black, size: CGSize.zero)
     sys.igeCounter += 1
     
@@ -57,6 +57,7 @@ class IGE: SKSpriteNode {
   
 };
 
+
 // FIXME: Make a protocol
 class IGE_CanDraw: IGE {
   
@@ -66,12 +67,13 @@ class IGE_CanDraw: IGE {
     guard let child = node as? Choice else { print("addChild: not a choice"); return }
     let didAdd = addKid(child, to: self)
     if !didAdd { print("addChild: did not add child") }
-    
   }
 };
 
+
 final class Super: IGE_CanDraw {
 };
+
 
 final class Prompt: IGE_CanDraw {
   
@@ -95,6 +97,7 @@ final class Prompt: IGE_CanDraw {
   required init?(coder aDecoder: NSCoder) { fatalError("") }
 };
 
+
 final class Choice: IGE {
   
   var mother: IGE_CanDraw
@@ -113,12 +116,15 @@ final class Choice: IGE {
                  touches.first!.location(in: scene!))
   }
   
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    sys.touch = (TouchTypes.ended, void, void)
+  }
+  
   init(title: String, mother: IGE_CanDraw) {
     self.mother = mother
     super.init(title: title)
   }
   required init?(coder aDecoder: NSCoder) { fatalError("") }
-  
 };
 
 //

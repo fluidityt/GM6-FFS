@@ -4,7 +4,7 @@ import SpriteKit
 // Random setup stuff:
 //
 
-let void = Void()
+let void: () = Void()
 
 enum TouchTypes { case began, moved, ended, added };
 
@@ -55,7 +55,7 @@ class GameScene: SKScene {
     sys.scene = self
     let addButton = AddButton(color: .green, size: CGSize(width: 200, height: 200))
     addButton.position.x = frame.minX
-    addButton.position.y -= 300
+    addButton.position.y = frame.minY
     addChild(addButton)
     
     let bkg = SKSpriteNode(color: .gray, size: size)
@@ -67,18 +67,21 @@ class GameScene: SKScene {
   
   private func test() {
     let zip = Super(title: "new prompt"); ZIPSTUFF: do {
-      addChild(zip)
       zip.position.x = frame.minX
       zip.position.y = frame.midY
+      addChild(zip)
       draw(zip)
       resize(zip)
       sys.currentNode = zip
+      sys.touch = (TouchTypes.added, void, void)
     }
   }
   
   override func didMove(to view: SKView) {
+    anchorPoint = CGPoint(x: 0.5, y: 0.5)
     initialize()
     test()
+    print("hi")
   }
   
 }
@@ -86,35 +89,12 @@ class GameScene: SKScene {
 // Touch and collision:
 extension GameScene {
   
-  private func doCollision(for child: IGE) {
-    // Should probably use multi-switch here...
-    // FIXME: Will need to determine which one is closest for multi-hits
-    if let prompt = child as? Prompt { // Determine if hit node is a prompt or choice:
-    } else if var choice = child as? Choice {
-      if sys.currentNode is Choice {
-        swapChoices(detectedChoice: &choice)
-      }
-    }
-    sys.collided = nil // FIXME: not sure if this works
-  }
-  
-  func doCollisions() -> Bool {
-    for child in children {
-      if child.name == "bkg" { continue }
-      if child.name == sys.currentNode!.name { continue }
-      
-      if sys.currentNode!.frame.intersects(child.frame) {
-        // Do collision:
-        print("hit detected")
-        return false
-      }
-    }
-    // Base case:
-    return true
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    print("hi")
   }
   
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if let collided = sys.collided { doCollision(for: collided) }
+    
   }
   
 }
@@ -123,8 +103,8 @@ extension GameScene {
 extension GameScene {
   
   override func update(_ currentTime: TimeInterval) {
-    if handleTouch(riskyTouch: sys.touch) {
-      doCollisions()
-    }
+   handleTouch(riskyTouch: sys.touch)
+
+
   }
 };
