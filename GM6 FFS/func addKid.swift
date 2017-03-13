@@ -19,7 +19,7 @@ func addKid(_ theKid: IGE, to theMother: IGE) -> Succeeded {
     sys.currentNode = kid
     
     
-    mother.align()
+    align(mother)
     
   case (let mother as IGE_CanDraw, let kid as Choice):
     kid.mother = mother

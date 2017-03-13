@@ -100,13 +100,6 @@ final class Choice: IGE {
   var mother: IGE_CanDraw
   weak var child: IGE?
   
-  func align() {
-    guard let theChild = child else { print("align: no child"); return }
-    theChild.position = position
-    theChild.position.x += frame.width + 10
-    draw(theChild as! Prompt)
-  }
-  
   override func addChild(_ node: SKNode) {
     if child != nil { print("addChild: already has prompt"); return }
     guard let kid = node as? Prompt else { print("not a prompt"); return }

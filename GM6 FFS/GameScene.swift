@@ -1,27 +1,26 @@
 import SpriteKit
 
+//
 // Random setup stuff:
+//
+
 let void = Void()
-typealias CheckCollisions = Bool
-typealias  Touch = (TouchTypes, Any, Any)?
 
-// Enums:
-enum TouchTypes { case began, moved, ended, added }
+enum TouchTypes { case began, moved, ended, added };
 
-enum Modes { case swap }
+enum Modes { case swap };
 
-// Constants:
 enum sizes {
+  
   static  let
-  prompt = CGSize(width: 50, height: 25),
+  prompt = CGSize(width:  50, height: 25),
   choice = CGSize(width: 200, height: 10)
   
   static func stretchedSize(numChildren: Int) -> CGSize {
     return CGSize(width: prompt.width, height: choice.height * 5.6)
   }
-}
+};
 
-// Globals:
 enum sys {
   
   static var
@@ -31,7 +30,7 @@ enum sys {
   frames:       [String: CGRect] = [:],
   collided:     IGE?,
   
-  touch: Touch,
+  touch: Touch,                          // NP
   isTouching: Bool = false
   
   /// Use this at various times... when sorting / swapping / deleting / adding iges.
@@ -39,29 +38,16 @@ enum sys {
     // Basically just a bunch of algos that adjust iges position.
     // So it isn"t overwhelming.. just render them at the correct Choice and then work on constraints later.
   }
-
-  static func swapChoices(detectedChoice: inout Choice) {
-    guard sys.currentNode is Choice else { fatalError("swapChoice: sys.curnode ! choice") }
-    print("swapping choices")
-    
-    let tempNode    = sys.currentNode!.copy() as! Choice // For use with detectedChoice.
-    sys.currentNode = detectedChoice.copy()   as! Choice
-    detectedChoice  = tempNode.copy()         as! Choice
-    
-    // FIXME: determine which one is further left
-    detectedChoice.align()
-    (sys.currentNode! as! Choice).align()
-    
-    // guard var curNode = sys.currentNode as? Choice else { fatalError("swapChoice: not a Choice selected") }
-    // swap(&curNode, &detectedChoice)
-  }
 };
 
+typealias CheckCollisions = Bool
+typealias Touch = (TouchTypes, Any, Any)?
 
 //
-//  GameScene.swift
+//  GameScene:
 //
 
+// Setup:
 class GameScene: SKScene {
   
   private func initialize() {
@@ -95,27 +81,24 @@ class GameScene: SKScene {
     test()
   }
   
+}
+
+// Touch and collision:
+extension GameScene {
+  
   private func doCollision(for child: IGE) {
     // Should probably use multi-switch here...
     // FIXME: Will need to determine which one is closest for multi-hits
     if let prompt = child as? Prompt { // Determine if hit node is a prompt or choice:
     } else if var choice = child as? Choice {
       if sys.currentNode is Choice {
-        sys.swapChoices(detectedChoice: &choice)
+        swapChoices(detectedChoice: &choice)
       }
     }
     sys.collided = nil // FIXME: not sure if this works
   }
   
-  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if let collided = sys.collided { doCollision(for: collided) }
-  }
-  
-  //
-  // Stuff:
-  //
-  
-  func doCollisionsIfNeededThenReturnIfNeedCheckAddButtons() -> Bool {
+  func doCollisions() -> Bool {
     for child in children {
       if child.name == "bkg" { continue }
       if child.name == sys.currentNode!.name { continue }
@@ -130,9 +113,18 @@ class GameScene: SKScene {
     return true
   }
   
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    if let collided = sys.collided { doCollision(for: collided) }
+  }
+  
+}
+
+// Game loop:
+extension GameScene {
+  
   override func update(_ currentTime: TimeInterval) {
     if handleTouch(riskyTouch: sys.touch) {
-      doCollisionsIfNeededThenReturnIfNeedCheckAddButtons()
+      doCollisions()
     }
   }
 };

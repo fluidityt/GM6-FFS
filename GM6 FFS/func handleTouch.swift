@@ -24,7 +24,7 @@ func handleTouch(riskyTouch: Touch) -> CheckCollisions {
     
   case (.moved, let choice as Choice, let xy as CGPoint):
     choice.position = xy
-    choice.align()
+    align(choice)
     return false
     
   case (.ended, _, _):
