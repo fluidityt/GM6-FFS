@@ -1,5 +1,5 @@
 //
-//  func addChild.swift
+//  func addKid.swift
 //  GM6 FFS
 
 import SpriteKit
@@ -12,23 +12,25 @@ func addKid(_ theKid: IGE, to theMother: IGE) -> Succeeded {
   switch (theMother, theKid) {
     
   case (let mother as Choice, let kid as Prompt):
+    kid.mother = mother
     
     mother.scene!.addChild(kid)
     mother.child = kid
     sys.currentNode = kid
     
-    kid.mother = mother
     
     mother.align()
     
-  case (let mother as Prompt, let kid as Choice):
+  case (let mother as IGE_CanDraw, let kid as Choice):
+    kid.mother = mother
+
     mother.scene!.addChild(kid)
     mother.childs.append(kid)
     sys.currentNode = kid
     
-    mother.draw()
-    mother.resize()
-    
+    draw(mother)
+    resize(mother)
+
   default: return false
     
   }

@@ -15,7 +15,10 @@
 		4D4D8DDC1E708A8D008FD61E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D4D8DDA1E708A8D008FD61E /* Main.storyboard */; };
 		4D4D8DDE1E708A8E008FD61E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D4D8DDD1E708A8E008FD61E /* Assets.xcassets */; };
 		4D4D8DE11E708A8E008FD61E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D4D8DDF1E708A8E008FD61E /* LaunchScreen.storyboard */; };
-		4D4D8DE91E7228DD008FD61E /* func addChild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D8DE81E7228DD008FD61E /* func addChild.swift */; };
+		4D4D8DE91E7228DD008FD61E /* func addKid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D8DE81E7228DD008FD61E /* func addKid.swift */; };
+		4D4D8DEC1E7635CF008FD61E /* func handleTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D8DEB1E7635CF008FD61E /* func handleTouch.swift */; };
+		4D4D8DEE1E763722008FD61E /* classes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D8DED1E763722008FD61E /* classes.swift */; };
+		4D4D8DF01E76394C008FD61E /* drawing funcs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D8DEF1E76394C008FD61E /* drawing funcs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,7 +32,10 @@
 		4D4D8DDD1E708A8E008FD61E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4D4D8DE01E708A8E008FD61E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4D4D8DE21E708A8E008FD61E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4D4D8DE81E7228DD008FD61E /* func addChild.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "func addChild.swift"; sourceTree = "<group>"; };
+		4D4D8DE81E7228DD008FD61E /* func addKid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "func addKid.swift"; sourceTree = "<group>"; };
+		4D4D8DEB1E7635CF008FD61E /* func handleTouch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "func handleTouch.swift"; sourceTree = "<group>"; };
+		4D4D8DED1E763722008FD61E /* classes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = classes.swift; sourceTree = "<group>"; };
+		4D4D8DEF1E76394C008FD61E /* drawing funcs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "drawing funcs.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,18 +68,29 @@
 		4D4D8DCF1E708A8B008FD61E /* GM6 FFS */ = {
 			isa = PBXGroup;
 			children = (
-				4D4D8DD01E708A8C008FD61E /* AppDelegate.swift */,
+				4D4D8DEA1E7635AC008FD61E /* junk */,
 				4D4D8DD21E708A8C008FD61E /* GameScene.sks */,
-				4D4D8DD41E708A8C008FD61E /* Actions.sks */,
 				4D4D8DD61E708A8C008FD61E /* GameScene.swift */,
-				4D4D8DE81E7228DD008FD61E /* func addChild.swift */,
+				4D4D8DE81E7228DD008FD61E /* func addKid.swift */,
+				4D4D8DEB1E7635CF008FD61E /* func handleTouch.swift */,
+				4D4D8DED1E763722008FD61E /* classes.swift */,
+				4D4D8DEF1E76394C008FD61E /* drawing funcs.swift */,
+			);
+			path = "GM6 FFS";
+			sourceTree = "<group>";
+		};
+		4D4D8DEA1E7635AC008FD61E /* junk */ = {
+			isa = PBXGroup;
+			children = (
+				4D4D8DD01E708A8C008FD61E /* AppDelegate.swift */,
+				4D4D8DD41E708A8C008FD61E /* Actions.sks */,
 				4D4D8DD81E708A8C008FD61E /* GameViewController.swift */,
 				4D4D8DDA1E708A8D008FD61E /* Main.storyboard */,
 				4D4D8DDD1E708A8E008FD61E /* Assets.xcassets */,
 				4D4D8DDF1E708A8E008FD61E /* LaunchScreen.storyboard */,
 				4D4D8DE21E708A8E008FD61E /* Info.plist */,
 			);
-			path = "GM6 FFS";
+			name = junk;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -150,10 +167,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D4D8DEE1E763722008FD61E /* classes.swift in Sources */,
 				4D4D8DD71E708A8C008FD61E /* GameScene.swift in Sources */,
+				4D4D8DEC1E7635CF008FD61E /* func handleTouch.swift in Sources */,
 				4D4D8DD91E708A8C008FD61E /* GameViewController.swift in Sources */,
+				4D4D8DF01E76394C008FD61E /* drawing funcs.swift in Sources */,
 				4D4D8DD11E708A8C008FD61E /* AppDelegate.swift in Sources */,
-				4D4D8DE91E7228DD008FD61E /* func addChild.swift in Sources */,
+				4D4D8DE91E7228DD008FD61E /* func addKid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
